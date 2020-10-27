@@ -1,14 +1,13 @@
 import requests
 import os
 import json
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+from urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 ports = os.environ.get('PORTS')
-ports = ports.strip(' ').split(',')
 urls = ['https://{0}/'.format(os.environ.get('DOMAIN'))]
 try:
+    ports = ports.strip(' ').split(',')
     for port in ports:
         urls.append('http://{0}:{1}/'.format(os.environ.get('DOMAIN'), port))
 except:
