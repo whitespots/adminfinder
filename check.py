@@ -5,11 +5,11 @@ from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 ports = os.environ.get('PORTS')
-urls = ['https://{0}/'.format(os.environ.get('DOMAIN'))]
+urls = ['https://{0}'.format(os.environ.get('DOMAIN'))]
 try:
     ports = ports.strip(' ').split(',')
     for port in ports:
-        urls.append('http://{0}:{1}/'.format(os.environ.get('DOMAIN'), port))
+        urls.append('http://{0}:{1}'.format(os.environ.get('DOMAIN'), port))
 except:
     pass
 vuln_id = os.environ.get('VULN_ID')
@@ -77,16 +77,17 @@ def check():
         try:
             for candidate in candidates:
                 candidate_score = 0
-                response = requests.get(candidate, timeout=4, verify=False)
+                response = requests.get(candidate, timeout=4, verify=False, allow_redirects=True)
                 for admin_pattern in admin_patterns:
-                    if response.text.find(admin_pattern) > -1:
+                    if response.text.lower().find(admin_pattern) > -1:
                         candidate_score += 15
                 for stop_word in stop_words:
-                    if response.text.find(stop_word) > -1:
+                    if response.text.lower().find(stop_word) > -1:
                         candidate_score -= 55
                 for stop_word in stop_words_path:
-                    if response.text.find(stop_word) > -1:
+                    if response.text.lower().find(stop_word) > -1:
                         candidate_score -= 5
+                #print(candidate_score)
                 if candidate_score >= 5:
                     return resp(True, candidate)
             return resp(False)
