@@ -83,7 +83,7 @@ def check():
                         candidate_score += 15
                 for stop_word in stop_words:
                     if response.text.find(stop_word) > -1:
-                        candidate_score -= 15
+                        candidate_score -= 55
                 for stop_word in stop_words_path:
                     if response.text.find(stop_word) > -1:
                         candidate_score -= 5
