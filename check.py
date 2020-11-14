@@ -40,21 +40,36 @@ admin_patterns = [
     'admin',
     'administrator',
     'django',
-    'manager',
+    'manager'
+]
+
+good_to_have = [
+    'login',
+    'password'
 ]
 
 stop_words = [
-    '404',
-    'not found',
-    '403',
-    'unavailable'
+    'bad',
+    'found',
+    'available',
+    'cannot',
+    'forbidden',
+    'restricted',
 ]
 
-stop_words_path = stop_words
+stop_content_types = [
+    'json',
+    'text/plain'
+]
+
+
+stop_words_path = []
 
 for url in urls:
     for path in path_list:
+        # TODO: think about it
         stop_words_path.append(f'{url}{path}')
+        stop_words_path.append(f'{path}')
 
 
 def prepare_requests(url):
@@ -77,17 +92,22 @@ def check():
         try:
             for candidate in candidates:
                 candidate_score = 0
+                # TODO: redirects are important
                 response = requests.get(candidate, timeout=4, verify=False, allow_redirects=True)
+                if response.status_code >= 400:
+                    return resp(False, candidate)
+                if any([stop_content_type in response.headers.get('Content-Type').lower() for stop_content_type in stop_content_types]):
+                    return resp(False, candidate)
                 for admin_pattern in admin_patterns:
                     if response.text.lower().find(admin_pattern) > -1:
                         candidate_score += 15
+                        for good_pattern in good_to_have:
+                            if response.text.lower().find(good_pattern) > -1:
+                                candidate_score += 5
                 for stop_word in stop_words:
                     if response.text.lower().find(stop_word) > -1:
                         candidate_score -= 55
-                for stop_word in stop_words_path:
-                    if response.text.lower().find(stop_word) > -1:
-                        candidate_score -= 5
-                #print(candidate_score)
+                print(candidate_score)
                 if candidate_score >= 5:
                     return resp(True, candidate)
             return resp(False)
