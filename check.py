@@ -107,7 +107,7 @@ def check():
                 for stop_word in stop_words:
                     if response.text.lower().find(stop_word) > -1:
                         candidate_score -= 55
-                print(candidate_score)
+                # print(candidate_score)
                 if candidate_score >= 5:
                     return resp(True, candidate)
             return resp(False)
